@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# OS files
+.DS_Store
+
+# TypeScript build info
+tsconfig.node.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# Vite
+vite.config.d.ts
+vite.config.js
