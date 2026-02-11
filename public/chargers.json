@@ -1,0 +1,85 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "MEF-PP-001",
+                "name": "Charge+ AEON Mall Mean Chey",
+                "operator": "Charge+",
+                "connectors": [
+                    "GB/T",
+                    "CCS2"
+                ],
+                "power_kw": 60,
+                "current_type": "DC",
+                "access": "Public",
+                "address": "AEON Mall Mean Chey, Phnom Penh",
+                "source": "MEF",
+                "source_url": "https://data.mef.gov.kh",
+                "last_updated": "2025-01",
+                "live_status": "unknown"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    104.9189,
+                    11.5165
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "MEF-PP-002",
+                "name": "TotalEnergies Chbar Ampov",
+                "operator": "TotalEnergies",
+                "connectors": [
+                    "CCS2"
+                ],
+                "power_kw": 50,
+                "current_type": "DC",
+                "access": "Public",
+                "address": "National Road 1, Phnom Penh",
+                "source": "MEF",
+                "source_url": "https://data.mef.gov.kh",
+                "last_updated": "2024-12",
+                "live_status": "available"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    104.9455,
+                    11.5352
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "MEF-SR-001",
+                "name": "PTT Siem Reap North",
+                "operator": "PTT",
+                "connectors": [
+                    "Type 2",
+                    "CCS2"
+                ],
+                "power_kw": 22,
+                "current_type": "AC/DC",
+                "access": "Public",
+                "address": "National Road 6, Siem Reap",
+                "source": "ODC",
+                "source_url": "https://opendevelopmentcambodia.net",
+                "last_updated": "2025-02",
+                "live_status": "unknown"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    103.8561,
+                    13.3633
+                ]
+            }
+        }
+    ]
+}
