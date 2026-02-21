@@ -1,37 +1,19 @@
 import { Moon, Sun } from "lucide-react"
-import { useTheme, Theme } from "@/components/theme-provider"
-import { cn } from "@/lib/utils"
+import { useTheme } from "@/components/theme-provider"
 
 export function ModeToggle() {
     const { theme, setTheme } = useTheme()
-
-    const modes: { value: Theme; icon: any; label: string }[] = [
-        { value: "light", icon: Sun, label: "Light" },
-        { value: "dark", icon: Moon, label: "Dark" },
-    ]
+    const isLight = theme === "light"
 
     return (
-        <div className="flex bg-bg-secondary/50 backdrop-blur-md border border-border p-1 rounded-full shadow-sm w-fit">
-            {modes.map((m) => {
-                const Icon = m.icon
-                const isActive = theme === m.value
-                return (
-                    <button
-                        key={m.value}
-                        onClick={() => setTheme(m.value)}
-                        className={cn(
-                            "flex items-center justify-center p-2 rounded-full transition-all duration-200",
-                            isActive
-                                ? "bg-background text-text-primary shadow-sm scale-110"
-                                : "text-text-secondary hover:text-text-primary hover:bg-bg-secondary"
-                        )}
-                        title={`${m.label} Mode`}
-                    >
-                        <Icon className="h-4 w-4" />
-                    </button>
-                )
-            })}
-        </div>
+        <button
+            onClick={() => setTheme(isLight ? "dark" : "light")}
+            className="flex items-center justify-center w-11 h-11 rounded-full border border-black/10 dark:border-white/20 bg-white/85 dark:bg-black/40 text-slate-900 dark:text-white backdrop-blur-md shadow-lg transition-all hover:scale-105 active:scale-95"
+            title={isLight ? "Switch to Dark Mode" : "Switch to Light Mode"}
+            aria-label={isLight ? "Switch to Dark Mode" : "Switch to Light Mode"}
+        >
+            {isLight ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+        </button>
     )
 }
 
