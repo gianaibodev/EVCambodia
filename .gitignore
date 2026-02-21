@@ -14,3 +14,4 @@ tsconfig.tsbuildinfo
 # Vite
 vite.config.d.ts
 vite.config.js
+.vercel

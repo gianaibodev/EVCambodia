@@ -1,4 +1,4 @@
-import { BarChart3, Leaf, Zap, RefreshCw, TrendingUp, DollarSign, Globe } from "lucide-react"
+import { BarChart3, Leaf, Zap, RefreshCw, TrendingUp, DollarSign } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export function ImpactDashboard({ onGoToMap }: { onGoToMap: () => void }) {

@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import * as L from 'leaflet'
-import { X, Navigation, Zap, Clock, Shield, Search } from 'lucide-react'
+import { X, Zap, Clock, Shield, Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useTheme } from '@/components/theme-provider'
 

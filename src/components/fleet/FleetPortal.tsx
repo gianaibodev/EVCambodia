@@ -1,4 +1,4 @@
-import { Truck, MapPin, BarChart, Shield, Activity, AlertCircle, ChevronRight } from "lucide-react"
+import { Truck, BarChart, Shield, Activity, AlertCircle, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export function FleetPortal() {
