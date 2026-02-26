@@ -1,5 +1,11 @@
 @import "leaflet/dist/leaflet.css";
 
+/* Force Leaflet map container to fill parent (fixes white screen when opening map view) */
+.leaflet-container {
+    height: 100% !important;
+    width: 100% !important;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

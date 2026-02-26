@@ -112,9 +112,16 @@ export function MapView({ showSidebar = true }: { showSidebar?: boolean }) {
     const [selectedStation, setSelectedStation] = useState<Station | null>(null)
     const [searchQuery, setSearchQuery] = useState('')
     const [isLoading, setIsLoading] = useState(true)
+    const [mapReady, setMapReady] = useState(false)
 
     // Verify theme is valid for Leaflet components
     const currentTheme = (theme === 'dark' ? 'dark' : 'light')
+
+    // Defer Leaflet mount until after layout so the container has real dimensions (fixes white screen)
+    useEffect(() => {
+        const t = setTimeout(() => setMapReady(true), 300)
+        return () => clearTimeout(t)
+    }, [])
 
     useEffect(() => {
         setIsLoading(true)
@@ -189,7 +196,10 @@ export function MapView({ showSidebar = true }: { showSidebar?: boolean }) {
         : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
 
     return (
-        <div className="relative w-full h-full flex flex-col md:flex-row bg-slate-50 dark:bg-[#050505] min-h-0 min-w-0 overflow-hidden">
+        <div
+            className="relative w-full flex flex-col md:flex-row bg-slate-50 dark:bg-[#050505] min-h-0 min-w-0 overflow-hidden"
+            style={{ height: '100%', minHeight: '100vh' }}
+        >
             {isLoading && (
                 <div className="absolute inset-0 z-[5000] bg-background/95 backdrop-blur-md flex flex-col items-center justify-center gap-6 transition-opacity duration-500">
                     <div className="relative">
@@ -274,12 +284,15 @@ export function MapView({ showSidebar = true }: { showSidebar?: boolean }) {
                 </div>
             )}
 
-            {/* Map Area */}
-            <div className="flex-1 relative bg-slate-200 dark:bg-zinc-900 overflow-hidden min-h-0 min-w-0" style={{ height: '100%', width: '100%' }}>
-                {/* Ensure this container has explicit dimensions for Leaflet */}
-                <div style={{ position: 'absolute', inset: 0, height: '100%', width: '100%', zIndex: 0 }}>
+            {/* Map Area - must have explicit size for Leaflet */}
+            <div
+                className="flex-1 relative overflow-hidden min-h-0 min-w-0 bg-slate-200 dark:bg-zinc-900"
+                style={{ position: 'relative', height: '100%', minHeight: 400 }}
+            >
+                {mapReady && (
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0 }}>
                     <MapContainer
-                        key={currentTheme} // Force re-mount on theme change
+                        key={currentTheme}
                         center={[11.55, 104.91]}
                         zoom={13}
                         style={{ height: '100%', width: '100%' }}
@@ -329,19 +342,21 @@ export function MapView({ showSidebar = true }: { showSidebar?: boolean }) {
                                 </Popup>
                             </Marker>
                         ))}
+                        {/* Floating Map Actions - must be inside MapContainer for LocateMeButton */}
+                        <div className="absolute top-6 right-6 z-[1000] flex flex-col gap-3 pointer-events-none">
+                            <div className="pointer-events-auto flex flex-col gap-3">
+                                <a 
+                                    href="mailto:demo@ev.kh" 
+                                    className="px-6 py-3 bg-accent text-white rounded-full font-black text-xs uppercase tracking-widest shadow-2xl hover:scale-105 transition-all"
+                                >
+                                    Book Demo
+                                </a>
+                                <LocateMeButton />
+                            </div>
+                        </div>
                     </MapContainer>
                 </div>
-
-                {/* Floating Map Actions */}
-                <div className="absolute top-6 right-6 z-[1000] flex flex-col gap-3">
-                    <a 
-                        href="mailto:demo@ev.kh" 
-                        className="px-6 py-3 bg-accent text-white rounded-full font-black text-xs uppercase tracking-widest shadow-2xl hover:scale-105 transition-all"
-                    >
-                        Book Demo
-                    </a>
-                    <LocateMeButton />
-                </div>
+                )}
 
                 {/* Mobile Detail Overlay */}
                 {selectedStation && (
