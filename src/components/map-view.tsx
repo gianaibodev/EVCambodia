@@ -52,9 +52,9 @@ function MapController({ center, zoom }: { center: [number, number], zoom: numbe
         // Fix for Leaflet not detecting container size on mount/view switch
         setTimeout(() => {
             map.invalidateSize()
-        }, 100)
+        }, 200)
         
-        if (center) {
+        if (center && Array.isArray(center) && center.length === 2 && !isNaN(center[0]) && !isNaN(center[1])) {
             map.flyTo(center, zoom, { duration: 1.5, easeLinearity: 0.25 })
         }
     }, [center, zoom, map])
@@ -97,43 +97,54 @@ export function MapView({ showSidebar = true }: { showSidebar?: boolean }) {
     const [searchQuery, setSearchQuery] = useState('')
     const [isLoading, setIsLoading] = useState(true)
 
+    // Verify theme is valid for Leaflet components
+    const currentTheme = (theme === 'dark' ? 'dark' : 'light')
+
     useEffect(() => {
         setIsLoading(true)
+        console.log('Fetching station data...')
         fetch('/ev_stations_odc_2025.json')
             .then(res => {
-                if (!res.ok) throw new Error('Network response was not ok');
+                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
                 return res.json();
             })
             .then(data => {
                 if (!data || !data.features) {
-                    console.error('Invalid data format:', data);
+                    console.error('Invalid data format received:', data);
                     setStations([]);
+                    setIsLoading(false);
                     return;
                 }
-                const flattened = data.features.map((f: any, index: number) => {
-                    const props = f.properties || {}
-                    const name = props['location name'] || 'Unknown Station'
-                    let operator = 'Independent'
-                    if (name.includes('PTT')) operator = 'PTT'
-                    else if (name.includes('Total')) operator = 'Total Energies'
-                    else if (name.includes('Charge+')) operator = 'Charge+'
-                    else if (name.includes('Energy Tech')) operator = 'EV Energy Tech'
-                    else if (name.includes('BYD')) operator = 'BYD'
+                
+                const flattened = data.features
+                    .filter((f: any) => f && f.geometry && f.geometry.coordinates)
+                    .map((f: any, index: number) => {
+                        const props = f.properties || {}
+                        const name = props['location name'] || 'Unknown Station'
+                        let operator = 'Independent'
+                        if (name.includes('PTT')) operator = 'PTT'
+                        else if (name.includes('Total')) operator = 'Total Energies'
+                        else if (name.includes('Charge+')) operator = 'Charge+'
+                        else if (name.includes('Energy Tech')) operator = 'EV Energy Tech'
+                        else if (name.includes('BYD')) operator = 'BYD'
 
-                    const coords = f.geometry?.coordinates
-                    const lat = coords && coords[1] ? coords[1] : 11.55
-                    const lng = coords && coords[0] ? coords[0] : 104.91
+                        const coords = f.geometry.coordinates
+                        // Leaflet expects [lat, lng], GeoJSON is [lng, lat]
+                        const lat = coords[1]
+                        const lng = coords[0]
 
-                    return {
-                        id: `st-${index}`,
-                        name,
-                        operator,
-                        connectors: (props['plug types'] || 'Type 2').split('/').map((s: string) => s.trim()),
-                        operation_time: props['operation time'] || '24/7',
-                        coordinates: [lat, lng],
-                        address: props['location'] || 'Cambodia'
-                    }
-                })
+                        return {
+                            id: `st-${index}`,
+                            name,
+                            operator,
+                            connectors: (props['plug types'] || 'Type 2').split('/').map((s: string) => s.trim()),
+                            operation_time: props['operation time'] || '24/7',
+                            coordinates: [lat, lng],
+                            address: props['location'] || 'Cambodia'
+                        }
+                    })
+                
+                console.log(`Loaded ${flattened.length} stations.`);
                 setStations(flattened)
                 setIsLoading(false)
             })
@@ -150,23 +161,32 @@ export function MapView({ showSidebar = true }: { showSidebar?: boolean }) {
         )
     }, [stations, searchQuery])
 
-    const tileUrl = theme === 'light'
-        ? 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
-        : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+    const tileUrl = currentTheme === 'light'
+        ? 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+        : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
 
     return (
-        <div className="relative w-full h-full flex flex-col md:flex-row bg-slate-50 dark:bg-[#050505]">
+        <div className="relative w-full h-full flex flex-col md:flex-row bg-slate-50 dark:bg-[#050505] min-h-0 min-w-0 overflow-hidden">
             {isLoading && (
-                <div className="absolute inset-0 z-[2000] bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center gap-4">
-                    <div className="w-10 h-10 border-4 border-accent/20 border-t-accent rounded-full animate-spin" />
-                    <p className="text-sm font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">Initializing Network Map...</p>
+                <div className="absolute inset-0 z-[5000] bg-background/95 backdrop-blur-md flex flex-col items-center justify-center gap-6">
+                    <div className="relative">
+                        <div className="w-16 h-16 border-4 border-accent/10 border-t-accent rounded-full animate-spin" />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <Zap className="w-6 h-6 text-accent animate-pulse" />
+                        </div>
+                    </div>
+                    <div className="flex flex-col items-center gap-2">
+                        <p className="text-sm font-black uppercase tracking-[0.3em] text-slate-900 dark:text-white">Connecting Grid...</p>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Retrieving National Node Registry</p>
+                    </div>
                 </div>
             )}
+            
             {/* Sidebar Search & List */}
             {showSidebar && (
-                <div className="w-full md:w-96 h-1/3 md:h-full bg-white dark:bg-black/40 backdrop-blur-3xl border-r border-black/10 dark:border-white/10 z-10 flex flex-col overflow-hidden">
+                <div className="w-full md:w-96 h-1/3 md:h-full bg-white dark:bg-black/40 backdrop-blur-3xl border-r border-black/10 dark:border-white/10 z-[1001] flex flex-col overflow-hidden min-h-0">
                     <LiveStatsStrip />
-                    <div className="p-6 border-b border-black/5 dark:border-white/5">
+                    <div className="p-6 border-b border-black/5 dark:border-white/5 shrink-0">
                         <div className="flex items-center gap-2 mb-6">
                             <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
                             <span className="text-xs font-black text-accent uppercase tracking-[0.3em]">Network Intelligence</span>
@@ -183,12 +203,11 @@ export function MapView({ showSidebar = true }: { showSidebar?: boolean }) {
                             />
                         </div>
                     </div>
-                    <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
+                    <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar min-h-0">
                         {isLoading ? (
-                            <div className="flex flex-col items-center justify-center h-40 gap-4">
-                                <div className="w-8 h-8 border-2 border-accent/20 border-t-accent rounded-full animate-spin" />
-                                <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Scanning Nodes...</span>
-                            </div>
+                            Array.from({ length: 6 }).map((_, i) => (
+                                <div key={i} className="w-full h-24 bg-slate-100 dark:bg-white/5 rounded-[1.5rem] animate-pulse" />
+                            ))
                         ) : filteredStations.length === 0 ? (
                             <div className="flex flex-col items-center justify-center h-40 gap-2 px-8 text-center">
                                 <Search className="w-8 h-8 text-slate-300 mb-2" />
@@ -233,14 +252,59 @@ export function MapView({ showSidebar = true }: { showSidebar?: boolean }) {
             )}
 
             {/* Map Area */}
-            <div className="flex-1 relative overflow-hidden min-h-[400px]">
+            <div className="flex-1 relative bg-slate-200 dark:bg-zinc-900 overflow-hidden min-h-0 min-w-0">
                 <MapContainer
-                    key={theme}
+                    key={currentTheme}
                     center={[11.55, 104.91]}
                     zoom={13}
-                    style={{ height: '100%', width: '100%', zIndex: 0 }}
+                    style={{ position: 'absolute', inset: 0, zIndex: 0 }}
                     zoomControl={false}
                 >
+                    <MapController center={selectedStation?.coordinates || [11.55, 104.91]} zoom={selectedStation ? 16 : 13} />
+                    <TileLayer 
+                        url={tileUrl} 
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                    />
+                    {filteredStations.map(s => (
+                        <Marker
+                            key={s.id}
+                            position={s.coordinates}
+                            icon={createCustomIcon(selectedStation?.id === s.id, currentTheme)}
+                            eventHandlers={{ click: () => setSelectedStation(s) }}
+                        >
+                            <Popup closeButton={false} className="red-noir-popup">
+                                <div className="p-5 min-w-[260px] bg-white dark:bg-black/95 backdrop-blur-2xl rounded-3xl border border-black/10 dark:border-white/10 shadow-2xl">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div>
+                                            <h3 className="font-black text-xl text-slate-950 dark:text-white uppercase tracking-tighter leading-none mb-1">{s.name.replace('Station', '').replace('EV', '')}</h3>
+                                            <div className="flex items-center gap-1.5">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                                <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Active Node</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <p className="text-xs font-bold text-slate-500 dark:text-zinc-400 mb-6 leading-relaxed uppercase tracking-tight">{s.address}</p>
+                                    
+                                    <div className="grid grid-cols-2 gap-3 mb-6">
+                                        <div className="bg-slate-50 dark:bg-white/5 p-3 rounded-2xl border border-black/5 dark:border-white/10">
+                                            <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">Schedule</p>
+                                            <p className="text-sm font-black text-slate-900 dark:text-white leading-none truncate">{s.operation_time}</p>
+                                        </div>
+                                        <div className="bg-slate-50 dark:bg-white/5 p-3 rounded-2xl border border-black/5 dark:border-white/10">
+                                            <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">Interface</p>
+                                            <p className="text-sm font-black text-slate-900 dark:text-white leading-none">{s.connectors[0]}</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <button className="w-full py-4 bg-accent text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-accent/20 hover:bg-red-600 transition-all active:scale-95">
+                                        Initialize Charge
+                                    </button>
+                                </div>
+                            </Popup>
+                        </Marker>
+                    ))}
+                </MapContainer>
                     <MapController center={selectedStation?.coordinates || [11.55, 104.91]} zoom={selectedStation ? 16 : 13} />
                     <TileLayer 
                         url={tileUrl} 
