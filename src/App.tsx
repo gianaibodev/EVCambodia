@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { cn } from "@/lib/utils"
-import { ArrowRight, Github, Sparkles, Zap, Map as MapIcon, Users, Leaf, ShieldCheck, Globe } from "lucide-react"
+import { ArrowRight, Github, Zap, Map as MapIcon, Users, Leaf, ShieldCheck, Globe } from "lucide-react"
 import { ModeToggle } from "@/components/mode-toggle"
 import { ThemeProvider } from "@/components/theme-provider"
 import { MapView } from "@/components/map-view"
