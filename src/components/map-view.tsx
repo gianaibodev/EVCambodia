@@ -305,51 +305,6 @@ export function MapView({ showSidebar = true }: { showSidebar?: boolean }) {
                         </Marker>
                     ))}
                 </MapContainer>
-                    <MapController center={selectedStation?.coordinates || [11.55, 104.91]} zoom={selectedStation ? 16 : 13} />
-                    <TileLayer 
-                        url={tileUrl} 
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-                    />
-                    {filteredStations.map(s => (
-                        <Marker
-                            key={s.id}
-                            position={s.coordinates}
-                            icon={createCustomIcon(selectedStation?.id === s.id, theme as 'light' | 'dark')}
-                            eventHandlers={{ click: () => setSelectedStation(s) }}
-                        >
-                            <Popup closeButton={false} className="red-noir-popup">
-                                <div className="p-5 min-w-[260px] bg-white dark:bg-black/95 backdrop-blur-2xl rounded-3xl border border-black/10 dark:border-white/10 shadow-2xl">
-                                    <div className="flex justify-between items-start mb-4">
-                                        <div>
-                                            <h3 className="font-black text-xl text-slate-950 dark:text-white uppercase tracking-tighter leading-none mb-1">{s.name.replace('Station', '').replace('EV', '')}</h3>
-                                            <div className="flex items-center gap-1.5">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                                <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Active Node</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <p className="text-xs font-bold text-slate-500 dark:text-zinc-400 mb-6 leading-relaxed uppercase tracking-tight">{s.address}</p>
-                                    
-                                    <div className="grid grid-cols-2 gap-3 mb-6">
-                                        <div className="bg-slate-50 dark:bg-white/5 p-3 rounded-2xl border border-black/5 dark:border-white/10">
-                                            <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">Schedule</p>
-                                            <p className="text-sm font-black text-slate-900 dark:text-white leading-none truncate">{s.operation_time}</p>
-                                        </div>
-                                        <div className="bg-slate-50 dark:bg-white/5 p-3 rounded-2xl border border-black/5 dark:border-white/10">
-                                            <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">Interface</p>
-                                            <p className="text-sm font-black text-slate-900 dark:text-white leading-none">{s.connectors[0]}</p>
-                                        </div>
-                                    </div>
-                                    
-                                    <button className="w-full py-4 bg-accent text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-accent/20 hover:bg-red-600 transition-all active:scale-95">
-                                        Initialize Charge
-                                    </button>
-                                </div>
-                            </Popup>
-                        </Marker>
-                    ))}
-                </MapContainer>
 
                 {/* Floating Map Actions */}
                 <div className="absolute top-6 right-6 z-[1000] flex flex-col gap-3">
