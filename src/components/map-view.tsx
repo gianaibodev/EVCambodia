@@ -49,6 +49,11 @@ const createCustomIcon = (isSelected: boolean, theme: 'light' | 'dark') => {
 function MapController({ center, zoom }: { center: [number, number], zoom: number }) {
     const map = useMap()
     useEffect(() => {
+        // Fix for Leaflet not detecting container size on mount/view switch
+        setTimeout(() => {
+            map.invalidateSize()
+        }, 100)
+        
         if (center) {
             map.flyTo(center, zoom, { duration: 1.5, easeLinearity: 0.25 })
         }
@@ -95,10 +100,18 @@ export function MapView({ showSidebar = true }: { showSidebar?: boolean }) {
     useEffect(() => {
         setIsLoading(true)
         fetch('/ev_stations_odc_2025.json')
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error('Network response was not ok');
+                return res.json();
+            })
             .then(data => {
+                if (!data || !data.features) {
+                    console.error('Invalid data format:', data);
+                    setStations([]);
+                    return;
+                }
                 const flattened = data.features.map((f: any, index: number) => {
-                    const props = f.properties
+                    const props = f.properties || {}
                     const name = props['location name'] || 'Unknown Station'
                     let operator = 'Independent'
                     if (name.includes('PTT')) operator = 'PTT'
@@ -107,18 +120,26 @@ export function MapView({ showSidebar = true }: { showSidebar?: boolean }) {
                     else if (name.includes('Energy Tech')) operator = 'EV Energy Tech'
                     else if (name.includes('BYD')) operator = 'BYD'
 
+                    const coords = f.geometry?.coordinates
+                    const lat = coords && coords[1] ? coords[1] : 11.55
+                    const lng = coords && coords[0] ? coords[0] : 104.91
+
                     return {
                         id: `st-${index}`,
                         name,
                         operator,
                         connectors: (props['plug types'] || 'Type 2').split('/').map((s: string) => s.trim()),
                         operation_time: props['operation time'] || '24/7',
-                        coordinates: [f.geometry.coordinates[1], f.geometry.coordinates[0]],
+                        coordinates: [lat, lng],
                         address: props['location'] || 'Cambodia'
                     }
                 })
                 setStations(flattened)
                 setIsLoading(false)
+            })
+            .catch(err => {
+                console.error('Failed to fetch stations:', err);
+                setIsLoading(false);
             })
     }, [])
 
@@ -135,6 +156,12 @@ export function MapView({ showSidebar = true }: { showSidebar?: boolean }) {
 
     return (
         <div className="relative w-full h-full flex flex-col md:flex-row bg-slate-50 dark:bg-[#050505]">
+            {isLoading && (
+                <div className="absolute inset-0 z-[2000] bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center gap-4">
+                    <div className="w-10 h-10 border-4 border-accent/20 border-t-accent rounded-full animate-spin" />
+                    <p className="text-sm font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">Initializing Network Map...</p>
+                </div>
+            )}
             {/* Sidebar Search & List */}
             {showSidebar && (
                 <div className="w-full md:w-96 h-1/3 md:h-full bg-white dark:bg-black/40 backdrop-blur-3xl border-r border-black/10 dark:border-white/10 z-10 flex flex-col overflow-hidden">
@@ -161,6 +188,12 @@ export function MapView({ showSidebar = true }: { showSidebar?: boolean }) {
                             <div className="flex flex-col items-center justify-center h-40 gap-4">
                                 <div className="w-8 h-8 border-2 border-accent/20 border-t-accent rounded-full animate-spin" />
                                 <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Scanning Nodes...</span>
+                            </div>
+                        ) : filteredStations.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center h-40 gap-2 px-8 text-center">
+                                <Search className="w-8 h-8 text-slate-300 mb-2" />
+                                <span className="text-sm font-bold text-slate-500">No nodes found in this sector.</span>
+                                <button onClick={() => setSearchQuery('')} className="text-xs font-black text-accent uppercase tracking-widest mt-2 hover:underline">Reset Search</button>
                             </div>
                         ) : (
                             filteredStations.map(s => (
@@ -200,15 +233,19 @@ export function MapView({ showSidebar = true }: { showSidebar?: boolean }) {
             )}
 
             {/* Map Area */}
-            <div className="flex-1 relative overflow-hidden">
+            <div className="flex-1 relative overflow-hidden min-h-[400px]">
                 <MapContainer
+                    key={theme}
                     center={[11.55, 104.91]}
                     zoom={13}
-                    className="w-full h-full z-0"
+                    style={{ height: '100%', width: '100%', zIndex: 0 }}
                     zoomControl={false}
                 >
                     <MapController center={selectedStation?.coordinates || [11.55, 104.91]} zoom={selectedStation ? 16 : 13} />
-                    <TileLayer url={tileUrl} />
+                    <TileLayer 
+                        url={tileUrl} 
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                    />
                     {filteredStations.map(s => (
                         <Marker
                             key={s.id}
