@@ -5,83 +5,254 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 354 85% 53%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 354 85% 53%;
-    --radius: 0.75rem;
-  }
+    :root {
+        /* Premium Red-Noir Light Mode Tokens - Adjusted for WCAG */
+        --bg-primary: 0 0% 100%;
+        --bg-secondary: 0 50% 97%;
+        --text-primary: 0 68% 6%;
+        --text-secondary: 215 16% 47%;
+        --accent: 354 85% 53%;
+        --accent-glow: 354 85% 53%;
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 354 85% 53%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 354 85% 53%;
-  }
+        /* shadcn defaults mapping */
+        --background: var(--bg-primary);
+        --foreground: var(--text-primary);
+        --card: var(--bg-primary);
+        --card-foreground: var(--text-primary);
+        --popover: var(--bg-primary);
+        --popover-foreground: var(--text-primary);
+        --primary: 354 85% 53%;
+        --primary-foreground: 210 40% 98%;
+        --secondary: 0 0% 96.1%;
+        --secondary-foreground: 0 0% 9%;
+        --muted: 0 0% 96.1%;
+        --muted-foreground: 0 0% 45.1%;
+        --destructive: 0 84.2% 60.2%;
+        --destructive-foreground: 210 40% 98%;
+        --border: 214 32% 91%;
+        --input: 214 32% 91%;
+        --ring: 354 85% 53%;
+        --radius: 1rem;
+    }
+
+    .dark {
+        /* Premium Red-Noir Dark Mode Tokens */
+        --bg-primary: 0 0% 0%;
+        --bg-secondary: 0 0% 4%;
+        --text-primary: 0 0% 100%;
+        --text-secondary: 240 5% 65%;
+        --accent: 354 85% 53%;
+        --accent-glow: 354 85% 53%;
+
+        --background: var(--bg-primary);
+        --foreground: var(--text-primary);
+        --card: var(--bg-secondary);
+        --card-foreground: var(--text-primary);
+        --muted: var(--bg-secondary);
+        --muted-foreground: var(--text-secondary);
+        --border: 240 3.7% 15.9%;
+        --primary: 354 85% 53%;
+    }
+}
+
+@property --gradient-angle {
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground antialiased;
-  }
+    * {
+        @apply border-border selection:bg-[#ef233c] selection:text-white;
+    }
+
+    body {
+        @apply bg-background text-foreground transition-colors duration-500 antialiased font-sans;
+        background-color: var(--background);
+    }
+
+    button {
+        @apply text-sm md:text-base;
+        min-height: 2.5rem;
+    }
 }
 
-@layer utilities {
-  .bg-grid-slate-200\/50 {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(226 232 240 / 0.5)'%3E%3Cpath d='M0 .5H31.5V32'/%3E%3C/svg%3E");
-  }
-  .dark .bg-grid-slate-800\/20 {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(30 41 59 / 0.2)'%3E%3Cpath d='M0 .5H31.5V32'/%3E%3C/svg%3E");
-  }
-  .text-glow {
-    text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
-  }
+/* Red-Noir Custom Animations */
+@keyframes border-spin {
+    from {
+        --gradient-angle: 0deg;
+    }
+    to {
+        --gradient-angle: 360deg;
+    }
 }
 
-/* Leaflet Popup Styling */
-.leaflet-popup-content-wrapper {
-  @apply bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl shadow-xl border border-slate-200 dark:border-slate-800 p-0 overflow-hidden;
+@keyframes animStar {
+    from {
+        transform: translateY(0px);
+    }
+    to {
+        transform: translateY(-2000px);
+    }
 }
 
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* Leaflet Popup Overrides for Red-Noir */
+.leaflet-popup-content-wrapper,
 .leaflet-popup-tip {
-  @apply bg-white dark:bg-slate-900;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
 }
 
-.custom-leaflet-icon {
-  background: none !important;
-  border: none !important;
+.leaflet-container a.leaflet-popup-close-button:hover {
+    color: #ef233c !important;
+    background: rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Red-Noir Utility Classes */
+@layer utilities {
+    .shiny-cta {
+        --gradient-angle: 0deg;
+        position: relative;
+        background: linear-gradient(hsl(var(--background)), hsl(var(--background))) padding-box,
+            conic-gradient(from var(--gradient-angle), transparent 0%, #ef233c 5%, #ef233c 15%, #ef233c 30%, transparent 40%, transparent 100%) border-box;
+        border: 2px solid transparent;
+        animation: border-spin 3s linear infinite;
+    }
+
+    .stars-1 {
+        box-shadow: 234px 124px #fff, 654px 345px #fff, 876px 12px #fff, 1200px 800px #fff, 400px 1500px #fff, 1800px 200px #fff, 100px 1000px #fff, 900px 1900px #fff, 500px 600px #fff, 1400px 100px #fff, 300px 400px #fff, 1600px 1200px #fff;
+    }
+
+    .stars-2 {
+        box-shadow: 123px 456px #fff, 789px 234px #fff, 456px 890px #fff, 1100px 300px #fff, 200px 1200px #fff, 1500px 500px #fff, 600px 1700px #fff, 1300px 900px #fff;
+    }
+
+    .text-glow {
+        text-shadow: 0 0 20px hsla(var(--accent), 0.3);
+    }
+
+    .dark .text-glow {
+        text-shadow: 0 0 30px hsla(var(--accent), 0.5), 0 0 10px hsla(var(--accent), 0.5);
+    }
+
+    .bg-grid-white {
+        background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+        background-size: 40px 40px;
+    }
+
+    .bg-grid-black {
+        background-image: linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+        background-size: 40px 40px;
+    }
+}
+
+/* Hide Popup on Mobile (Use Bottom Sheet instead) */
+@media (max-width: 768px) {
+    .leaflet-popup {
+        display: none !important;
+    }
+}
+
+.leaflet-popup-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: auto !important;
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+    color: white !important;
+    top: 10px !important;
+    right: 10px !important;
+    padding: 8px !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    backdrop-filter: blur(4px);
+    border-radius: 50%;
+    width: 24px !important;
+    height: 24px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font: 16px/14px Tahoma, Verdana, sans-serif !important;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    z-index: 100;
+}
+
+/* Safe Area Utilities */
+@layer utilities {
+    .pt-safe {
+        padding-top: env(safe-area-inset-top, 0px);
+    }
+
+    .pb-safe {
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    .mb-safe {
+        margin-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    .mt-safe {
+        margin-top: env(safe-area-inset-top, 0px);
+    }
+
+    .bottom-safe {
+        bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    .top-safe {
+        top: env(safe-area-inset-top, 0px);
+    }
+}
+
+/* Native-like Drawer Animations */
+@keyframes sheet-up {
+    0% {
+        transform: translateY(100%);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
+}
+
+@keyframes fade-in {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.animate-sheet-up {
+    animation: sheet-up 0.4s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+.animate-fade-in {
+    animation: fade-in 0.3s ease-out forwards;
+}
+
+/* Responsive Font Scaling */
+@media (max-width: 380px) {
+    .text-4xl {
+        font-size: 1.875rem;
+    }
+
+    /* Shrink EV.KH on tiny screens */
+    .p-6 {
+        padding: 1rem;
+    }
 }

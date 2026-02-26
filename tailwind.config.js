@@ -10,21 +10,8 @@ export default {
                 sm: 'calc(var(--radius) - 4px)'
             },
             colors: {
-                background: "var(--background)",
-                foreground: "var(--foreground)",
-                "bg-primary": "var(--bg-primary)",
-                "bg-secondary": "var(--bg-secondary)",
-                "text-primary": "var(--text-primary)",
-                "text-secondary": "var(--text-secondary)",
-                accent: "var(--accent)",
-                card: {
-                    DEFAULT: "var(--card)",
-                    foreground: "var(--card-foreground)"
-                },
-                popover: {
-                    DEFAULT: "var(--popover)",
-                    foreground: "var(--popover-foreground)"
-                },
+                background: "hsl(var(--background))",
+                foreground: "hsl(var(--foreground))",
                 primary: {
                     DEFAULT: "hsl(var(--primary))",
                     foreground: "hsl(var(--primary-foreground))"
@@ -33,12 +20,28 @@ export default {
                     DEFAULT: "hsl(var(--secondary))",
                     foreground: "hsl(var(--secondary-foreground))"
                 },
-                muted: {
-                    DEFAULT: "var(--bg-secondary)",
-                    foreground: "var(--text-secondary)"
+                destructive: {
+                    DEFAULT: "hsl(var(--destructive))",
+                    foreground: "hsl(var(--destructive-foreground))"
                 },
-                border: "var(--border)",
-                input: "var(--input)",
+                muted: {
+                    DEFAULT: "hsl(var(--muted))",
+                    foreground: "hsl(var(--muted-foreground))"
+                },
+                accent: {
+                    DEFAULT: "hsl(var(--accent))",
+                    foreground: "hsl(var(--accent-foreground))"
+                },
+                popover: {
+                    DEFAULT: "hsl(var(--popover))",
+                    foreground: "hsl(var(--popover-foreground))"
+                },
+                card: {
+                    DEFAULT: "hsl(var(--card))",
+                    foreground: "hsl(var(--card-foreground))"
+                },
+                border: "hsl(var(--border))",
+                input: "hsl(var(--input))",
                 ring: "hsl(var(--ring))",
                 chart: {
                     '1': 'hsl(var(--chart-1))',

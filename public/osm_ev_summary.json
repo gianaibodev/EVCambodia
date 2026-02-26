@@ -1,0 +1,13 @@
+{
+  "source": "OpenStreetMap via Overpass API",
+  "url": "https://overpass-turbo.eu",
+  "license": "ODbL 1.0",
+  "query_date": "2025-02-20",
+  "summary": {
+    "total_mapped_charging_stations": 31,
+    "phnom_penh": 24,
+    "siem_reap": 4,
+    "other_provinces": 3
+  },
+  "note": "OSM data may be incomplete vs official registry. Official 2025 registry (104 stations) from Cambodia GDDE/MEF is authoritative."
+}

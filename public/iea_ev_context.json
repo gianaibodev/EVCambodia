@@ -1,0 +1,60 @@
+{
+  "source": "IEA Global EV Outlook 2024",
+  "url": "https://www.iea.org/data-and-statistics/data-tools/global-ev-data-explorer",
+  "license": "CC BY 4.0",
+  "note": "Selected indicators, Southeast Asia + Cambodia context",
+  "global_ev_stock_millions": [
+    {
+      "year": 2019,
+      "value": 7.2
+    },
+    {
+      "year": 2020,
+      "value": 10.2
+    },
+    {
+      "year": 2021,
+      "value": 16.5
+    },
+    {
+      "year": 2022,
+      "value": 26.0
+    },
+    {
+      "year": 2023,
+      "value": 40.0
+    }
+  ],
+  "sea_ev_sales_share_pct": [
+    {
+      "country": "Thailand",
+      "year": 2023,
+      "value": 9.0
+    },
+    {
+      "country": "Indonesia",
+      "year": 2023,
+      "value": 2.0
+    },
+    {
+      "country": "Vietnam",
+      "year": 2023,
+      "value": 15.0
+    },
+    {
+      "country": "Cambodia",
+      "year": 2023,
+      "value": 3.5
+    }
+  ],
+  "charging_infrastructure": {
+    "global_public_chargers_2023": 2700000,
+    "sea_public_chargers_2023": 45000,
+    "cambodia_registered_2025": 104
+  },
+  "ev_market_context": {
+    "global_ev_share_new_sales_2023_pct": 18,
+    "sea_ev_share_new_sales_2023_pct": 6,
+    "cambodia_ev_share_new_sales_2023_pct": 3.5
+  }
+}
