@@ -103,8 +103,14 @@ export function MapView({ showSidebar = true }: { showSidebar?: boolean }) {
     useEffect(() => {
         setIsLoading(true)
         console.log('Fetching station data...')
-        fetch('/ev_stations_odc_2025.json')
+        
+        // Timeout for fetch to ensure we don't hang in loading state forever
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+        fetch('/ev_stations_odc_2025.json', { signal: controller.signal })
             .then(res => {
+                clearTimeout(timeoutId);
                 if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
                 return res.json();
             })
@@ -150,6 +156,7 @@ export function MapView({ showSidebar = true }: { showSidebar?: boolean }) {
             })
             .catch(err => {
                 console.error('Failed to fetch stations:', err);
+                // Even on error, we should stop loading to show the map
                 setIsLoading(false);
             })
     }, [])
@@ -166,9 +173,9 @@ export function MapView({ showSidebar = true }: { showSidebar?: boolean }) {
         : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
 
     return (
-        <div className="relative w-full h-full flex flex-col md:flex-row bg-slate-50 dark:bg-[#050505] min-h-0 min-w-0 overflow-hidden">
+        <div className="relative w-full h-full flex flex-col md:flex-row bg-red-500/10 dark:bg-red-900/10 min-h-0 min-w-0 overflow-hidden">
             {isLoading && (
-                <div className="absolute inset-0 z-[5000] bg-background/95 backdrop-blur-md flex flex-col items-center justify-center gap-6">
+                <div className="absolute inset-0 z-[5000] bg-white dark:bg-black flex flex-col items-center justify-center gap-6">
                     <div className="relative">
                         <div className="w-16 h-16 border-4 border-accent/10 border-t-accent rounded-full animate-spin" />
                         <div className="absolute inset-0 flex items-center justify-center">
@@ -252,59 +259,61 @@ export function MapView({ showSidebar = true }: { showSidebar?: boolean }) {
             )}
 
             {/* Map Area */}
-            <div className="flex-1 relative bg-slate-200 dark:bg-zinc-900 overflow-hidden min-h-0 min-w-0">
-                <MapContainer
-                    key={currentTheme}
-                    center={[11.55, 104.91]}
-                    zoom={13}
-                    style={{ position: 'absolute', inset: 0, zIndex: 0 }}
-                    zoomControl={false}
-                >
-                    <MapController center={selectedStation?.coordinates || [11.55, 104.91]} zoom={selectedStation ? 16 : 13} />
-                    <TileLayer 
-                        url={tileUrl} 
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-                    />
-                    {filteredStations.map(s => (
-                        <Marker
-                            key={s.id}
-                            position={s.coordinates}
-                            icon={createCustomIcon(selectedStation?.id === s.id, currentTheme)}
-                            eventHandlers={{ click: () => setSelectedStation(s) }}
-                        >
-                            <Popup closeButton={false} className="red-noir-popup">
-                                <div className="p-5 min-w-[260px] bg-white dark:bg-black/95 backdrop-blur-2xl rounded-3xl border border-black/10 dark:border-white/10 shadow-2xl">
-                                    <div className="flex justify-between items-start mb-4">
-                                        <div>
-                                            <h3 className="font-black text-xl text-slate-950 dark:text-white uppercase tracking-tighter leading-none mb-1">{s.name.replace('Station', '').replace('EV', '')}</h3>
-                                            <div className="flex items-center gap-1.5">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                                <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Active Node</span>
+            <div className="flex-1 relative bg-blue-500/10 dark:bg-blue-900/10 overflow-hidden min-h-0 min-w-0" style={{ height: '100%', width: '100%' }}>
+                <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
+                    <MapContainer
+                        key={currentTheme}
+                        center={[11.55, 104.91]}
+                        zoom={13}
+                        style={{ height: '100%', width: '100%' }}
+                        zoomControl={false}
+                    >
+                        <MapController center={selectedStation?.coordinates || [11.55, 104.91]} zoom={selectedStation ? 16 : 13} />
+                        <TileLayer 
+                            url={tileUrl} 
+                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                        />
+                        {filteredStations.map(s => (
+                            <Marker
+                                key={s.id}
+                                position={s.coordinates}
+                                icon={createCustomIcon(selectedStation?.id === s.id, currentTheme)}
+                                eventHandlers={{ click: () => setSelectedStation(s) }}
+                            >
+                                <Popup closeButton={false} className="red-noir-popup">
+                                    <div className="p-5 min-w-[260px] bg-white dark:bg-black/95 backdrop-blur-2xl rounded-3xl border border-black/10 dark:border-white/10 shadow-2xl">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div>
+                                                <h3 className="font-black text-xl text-slate-950 dark:text-white uppercase tracking-tighter leading-none mb-1">{s.name.replace('Station', '').replace('EV', '')}</h3>
+                                                <div className="flex items-center gap-1.5">
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                                    <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Active Node</span>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    
-                                    <p className="text-xs font-bold text-slate-500 dark:text-zinc-400 mb-6 leading-relaxed uppercase tracking-tight">{s.address}</p>
-                                    
-                                    <div className="grid grid-cols-2 gap-3 mb-6">
-                                        <div className="bg-slate-50 dark:bg-white/5 p-3 rounded-2xl border border-black/5 dark:border-white/10">
-                                            <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">Schedule</p>
-                                            <p className="text-sm font-black text-slate-900 dark:text-white leading-none truncate">{s.operation_time}</p>
+                                        
+                                        <p className="text-xs font-bold text-slate-500 dark:text-zinc-400 mb-6 leading-relaxed uppercase tracking-tight">{s.address}</p>
+                                        
+                                        <div className="grid grid-cols-2 gap-3 mb-6">
+                                            <div className="bg-slate-50 dark:bg-white/5 p-3 rounded-2xl border border-black/5 dark:border-white/10">
+                                                <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">Schedule</p>
+                                                <p className="text-sm font-black text-slate-900 dark:text-white leading-none truncate">{s.operation_time}</p>
+                                            </div>
+                                            <div className="bg-slate-50 dark:bg-white/5 p-3 rounded-2xl border border-black/5 dark:border-white/10">
+                                                <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">Interface</p>
+                                                <p className="text-sm font-black text-slate-900 dark:text-white leading-none">{s.connectors[0]}</p>
+                                            </div>
                                         </div>
-                                        <div className="bg-slate-50 dark:bg-white/5 p-3 rounded-2xl border border-black/5 dark:border-white/10">
-                                            <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">Interface</p>
-                                            <p className="text-sm font-black text-slate-900 dark:text-white leading-none">{s.connectors[0]}</p>
-                                        </div>
+                                        
+                                        <button className="w-full py-4 bg-accent text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-accent/20 hover:bg-red-600 transition-all active:scale-95">
+                                            Initialize Charge
+                                        </button>
                                     </div>
-                                    
-                                    <button className="w-full py-4 bg-accent text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-accent/20 hover:bg-red-600 transition-all active:scale-95">
-                                        Initialize Charge
-                                    </button>
-                                </div>
-                            </Popup>
-                        </Marker>
-                    ))}
-                </MapContainer>
+                                </Popup>
+                            </Marker>
+                        ))}
+                    </MapContainer>
+                </div>
 
                 {/* Floating Map Actions */}
                 <div className="absolute top-6 right-6 z-[1000] flex flex-col gap-3">
