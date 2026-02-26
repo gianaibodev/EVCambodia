@@ -331,7 +331,6 @@ export function MapView({ showSidebar = true }: { showSidebar?: boolean }) {
                         ))}
                     </MapContainer>
                 </div>
-            </div>
 
                 {/* Floating Map Actions */}
                 <div className="absolute top-6 right-6 z-[1000] flex flex-col gap-3">
