@@ -48,16 +48,32 @@ const createCustomIcon = (isSelected: boolean, theme: 'light' | 'dark') => {
 
 function MapController({ center, zoom }: { center: [number, number], zoom: number }) {
     const map = useMap()
+    
     useEffect(() => {
-        // Fix for Leaflet not detecting container size on mount/view switch
-        setTimeout(() => {
-            map.invalidateSize()
-        }, 200)
+        // Aggressive size invalidation to handle layout transitions
+        const invalidate = () => map.invalidateSize()
         
+        // Immediate and staggered updates
+        invalidate()
+        const t1 = setTimeout(invalidate, 100)
+        const t2 = setTimeout(invalidate, 500)
+        const t3 = setTimeout(invalidate, 1000)
+        
+        // Also invalidate when window resizes
+        window.addEventListener('resize', invalidate)
+
         if (center && Array.isArray(center) && center.length === 2 && !isNaN(center[0]) && !isNaN(center[1])) {
             map.flyTo(center, zoom, { duration: 1.5, easeLinearity: 0.25 })
         }
+        
+        return () => {
+            clearTimeout(t1)
+            clearTimeout(t2)
+            clearTimeout(t3)
+            window.removeEventListener('resize', invalidate)
+        }
     }, [center, zoom, map])
+    
     return null
 }
 
@@ -173,9 +189,9 @@ export function MapView({ showSidebar = true }: { showSidebar?: boolean }) {
         : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
 
     return (
-        <div className="relative w-full h-full flex flex-col md:flex-row bg-red-500/10 dark:bg-red-900/10 min-h-0 min-w-0 overflow-hidden">
+        <div className="relative w-full h-full flex flex-col md:flex-row bg-slate-50 dark:bg-[#050505] min-h-0 min-w-0 overflow-hidden">
             {isLoading && (
-                <div className="absolute inset-0 z-[5000] bg-white dark:bg-black flex flex-col items-center justify-center gap-6">
+                <div className="absolute inset-0 z-[5000] bg-background/95 backdrop-blur-md flex flex-col items-center justify-center gap-6 transition-opacity duration-500">
                     <div className="relative">
                         <div className="w-16 h-16 border-4 border-accent/10 border-t-accent rounded-full animate-spin" />
                         <div className="absolute inset-0 flex items-center justify-center">
@@ -259,10 +275,11 @@ export function MapView({ showSidebar = true }: { showSidebar?: boolean }) {
             )}
 
             {/* Map Area */}
-            <div className="flex-1 relative bg-blue-500/10 dark:bg-blue-900/10 overflow-hidden min-h-0 min-w-0" style={{ height: '100%', width: '100%' }}>
-                <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
+            <div className="flex-1 relative bg-slate-200 dark:bg-zinc-900 overflow-hidden min-h-0 min-w-0" style={{ height: '100%', width: '100%' }}>
+                {/* Ensure this container has explicit dimensions for Leaflet */}
+                <div style={{ position: 'absolute', inset: 0, height: '100%', width: '100%', zIndex: 0 }}>
                     <MapContainer
-                        key={currentTheme}
+                        key={currentTheme} // Force re-mount on theme change
                         center={[11.55, 104.91]}
                         zoom={13}
                         style={{ height: '100%', width: '100%' }}
@@ -314,6 +331,7 @@ export function MapView({ showSidebar = true }: { showSidebar?: boolean }) {
                         ))}
                     </MapContainer>
                 </div>
+            </div>
 
                 {/* Floating Map Actions */}
                 <div className="absolute top-6 right-6 z-[1000] flex flex-col gap-3">
